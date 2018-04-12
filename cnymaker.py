@@ -11,9 +11,6 @@ from maker import Maker
 import time
 from Crypto.Cipher import AES
 
-
-
-
 h = open("config.json", 'rb')
 print('please input the decipher key:')
 key = input()
@@ -21,15 +18,12 @@ cipher = AES.new(key)
 encrypted = h.read()
 unpad = lambda s: s[0:-ord(s[-1])]
 
-#text = unpad(cipher.decrypt(encrypted).decode('utf-8'))
-
 globalconfig = json.loads(unpad(cipher.decrypt(encrypted).decode('utf-8')))
 h.close()
 
 
 pairs = [{"Initsuccess": False, "pair": ' ', "maker": 0, "asset":'GDEX.BTC', "base":'CNY', "priceuplimit": 200000, "pricedownlimit": 10000, "Gaprate": 0.01, "spreadrate": 0.008, "size":4, "amount": 5000}]
 pairs.append ({"Initsuccess": False, "pair": ' ', "maker": 0, "asset":'GDEX.ETH', "base":'CNY', "priceuplimit": 20000, "pricedownlimit": 1000, "Gaprate": 0.01, "spreadrate": 0.008, "size":4, "amount": 5000})
-#pairs = [({"Initsuccess": False, "pair": ' ', "maker": 0, "asset":'GDEX.ETH', "base":'CNY', "priceuplimit": 20000, "pricedownlimit": 1000, "Gaprate": 0.01, "spreadrate": 0.008, "size":4, "amount": 5000})]
 pairs.append({"Initsuccess": False, "pair": ' ', "maker": 0, "asset":'GDEX.EOS', "base":'CNY', "priceuplimit": 400, "pricedownlimit": 10, "Gaprate": 0.01, "spreadrate": 0.008, "size":4, "amount": 5000})
 pairs.append({"Initsuccess": False, "pair": ' ', "maker": 0, "asset":'GDEX.NEO', "base":'CNY', "priceuplimit": 4000, "pricedownlimit": 100, "Gaprate": 0.011, "spreadrate": 0.0088, "size":6, "amount": 5000})
 pairs.append({"Initsuccess": False, "pair": ' ', "maker": 0, "asset":'GDEX.GAS', "base":'CNY', "priceuplimit": 1000, "pricedownlimit": 70, "Gaprate": 0.01, "spreadrate": 0.008, "size":6, "amount": 5000})
@@ -54,4 +48,15 @@ while True:
             except Exception as e:
                 print(pair['pair'] + "failed to initialize orders, error:", e)
                 pair['Initsuccess'] = False
-"cnymaker.py" 68L, 3401C                                                                                                                                                                17,1          Top
+                time.sleep(5)
+        if pair['Initsuccess']:
+            today = datetime.now()
+            yesterday = today + timedelta(hours=-24)
+            strYesterday = str(yesterday)[:10]
+            try:
+                pair['maker'].ReviewOrders()
+            except Exception as e:
+                print(pair['pair'] + "error:", e)
+                pair['maker'].ReconnectBTS(globalconfig)
+                time.sleep(5)
+        time.sleep(5)
